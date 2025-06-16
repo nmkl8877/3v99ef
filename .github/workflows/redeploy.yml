@@ -1,0 +1,19 @@
+name: Keep Streamlit Alive
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Touch keepalive file
+        run: |
+          echo "$(date)" >> keepalive.log
+          git config --global user.name 'streamlit-bot'
+          git config --global user.email 'bot@example.com'
+          git add keepalive.log
+          git commit -m "keepalive update"
+          git push
