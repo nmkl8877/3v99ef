@@ -1,19 +1,28 @@
 name: Keep Streamlit Alive
+
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: '0 */5 * * *'  # 每5小时执行一次
+
 jobs:
   redeploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Touch keepalive file
+      - name: Update keepalive log and push if changed
         run: |
           echo "$(date)" >> keepalive.log
           git config --global user.name 'streamlit-bot'
           git config --global user.email 'bot@example.com'
           git add keepalive.log
-          git commit -m "keepalive update"
-          git push
+          # 只有当有变更时才提交和推送，避免无效提交
+          if ! git diff --cached --quiet; then
+            git commit -m "keepalive update $(date)"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
