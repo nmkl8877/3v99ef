@@ -2,7 +2,8 @@ name: Keep Streamlit Alive
 
 on:
   schedule:
-    - cron: '0 */5 * * *'  # 每5小时执行一次
+    - cron: '*/30 * * * *'  # 每30分钟运行一次（UTC）
+  workflow_dispatch:
 
 jobs:
   redeploy:
@@ -12,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 拉取完整历史，方便 git 操作
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
@@ -32,6 +33,5 @@ jobs:
             echo "No changes to commit"
           fi
         env:
-          # 使用自动生成的 GitHub Token 认证推送
           GIT_ASKPASS: /bin/echo
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
