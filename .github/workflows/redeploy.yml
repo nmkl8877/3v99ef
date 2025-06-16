@@ -10,19 +10,28 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 拉取完整历史，方便 git 操作
 
-      - name: Update keepalive log and push if changed
+      - name: Configure Git
         run: |
-          echo "$(date)" >> keepalive.log
-          git config --global user.name 'streamlit-bot'
-          git config --global user.email 'bot@example.com'
+          git config user.name "streamlit-bot"
+          git config user.email "bot@example.com"
+
+      - name: Update keepalive log
+        run: echo "$(date)" >> keepalive.log
+
+      - name: Commit and push changes if any
+        run: |
           git add keepalive.log
-          # 只有当有变更时才提交和推送，避免无效提交
           if ! git diff --cached --quiet; then
             git commit -m "keepalive update $(date)"
-            git push
+            git push origin HEAD:main
           else
             echo "No changes to commit"
           fi
-
+        env:
+          # 使用自动生成的 GitHub Token 认证推送
+          GIT_ASKPASS: /bin/echo
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
