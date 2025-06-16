@@ -2,7 +2,7 @@ name: Keep Streamlit Alive
 
 on:
   schedule:
-    - cron: '0 */5 * * *'  # 每 5 小时执行一次，UTC 时间
+    - cron: '*/300 * * * *'  # 每300分钟运行一次（UTC）
   workflow_dispatch:
 
 jobs:
@@ -10,25 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 拉取完整历史，避免 rebase 问题
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
-          git config --global user.name "streamlit-bot"
-          git config --global user.email "bot@example.com"
+          git config user.name "streamlit-bot"
+          git config user.email "bot@example.com"
 
       - name: Update keepalive log
-        run: echo "Keepalive ping: $(date -u)" >> keepalive.log
+        run: echo "$(date)" >> keepalive.log
 
-      - name: Commit, pull --rebase and push if changed
+      - name: Commit and push changes if any
         run: |
           git add keepalive.log
           if ! git diff --cached --quiet; then
-            git commit -m "keepalive update $(date -u)"
-            git pull --rebase origin main
+            git commit -m "keepalive update $(date)"
             git push origin HEAD:main
           else
             echo "No changes to commit"
